@@ -1,7 +1,7 @@
 (asdf:defsystem "dungeon"
-  :description "Describe %ApplicationName% here"
-  :author "complexitycollapse <complexitycollapse@github.com>"
-  :license ""
+  :description "a render framework designed for old school roguelike game"
+  :author "Ivory"
+  :license "MIT"
   :version "0.0.1"
   :serial t
   :depends-on (:sdl2 :sdl2-image :sdl2-ttf :3d-vectors)
@@ -12,9 +12,9 @@
                (:file "src/main")))
 
 (asdf:defsystem "dungeon/test"
-  :description "Describe %ApplicationName% here"
-  :author "complexitycollapse <complexitycollapse@github.com>"
-  :license ""
+  :description "test"
+  :author "Ivory"
+  :license "MIT"
   :version "0.0.1"
   :serial t
   :depends-on (:dungeon)
