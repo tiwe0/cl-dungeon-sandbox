@@ -57,27 +57,27 @@
                         ((sdl2:scancode= scancode :scancode-w)
                          (progn
                            (format t "~a~%" "go north")
-                           (dungeon/camera:camera-all-position- *camera-main* (vec 0 *glyph-size* 0))))
+                           (dungeon/camera:camera-game-position- *camera-main* (vec 0 1 0))))
                         ((sdl2:scancode= scancode :scancode-a)
                          (progn
                            (format t "~a~%" "go west")
-                           (dungeon/camera:camera-all-position- *camera-main* (vec *glyph-size* 0 0))))
+                           (dungeon/camera:camera-game-position- *camera-main* (vec 1 0 0))))
                         ((sdl2:scancode= scancode :scancode-s)
                          (progn
                            (format t "~a~%" "go sourth")
-                           (dungeon/camera:camera-all-position+ *camera-main* (vec 0 *glyph-size* 0))))
+                           (dungeon/camera:camera-game-position+ *camera-main* (vec 0 1 0))))
                         ((sdl2:scancode= scancode :scancode-d)
                          (progn
                            (format t "~a~%" "go east")
-                           (dungeon/camera:camera-all-position+ *camera-main* (vec *glyph-size* 0 0))))
+                           (dungeon/camera:camera-game-position+ *camera-main* (vec 1 0 0))))
                         ((sdl2:scancode= scancode :scancode-q)
                          (progn
                            (format t "~a~%" "go up")
-                           (dungeon/camera:camera-all-position+ *camera-main* (vec 0 0 *glyph-size*))))
+                           (dungeon/camera:camera-game-position+ *camera-main* (vec 0 0 1))))
                         ((sdl2:scancode= scancode :scancode-e)
                          (progn
                            (format t "~a~%" "go down")
-                           (dungeon/camera:camera-all-position- *camera-main* (vec 0 0 *glyph-size*))))
+                           (dungeon/camera:camera-game-position- *camera-main* (vec 0 0 1))))
                         )
                       (format t "camera position: ~a~%" (dungeon/camera::camera-position *camera-main*))
                       (format t "Key sym: ~a, code: ~a, mod: ~a~%" sym scancode mod-value)))
@@ -85,8 +85,10 @@
                   (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-escape)
                     (sdl2:push-event :quit)))
           (:mousemotion (:x x :y y :xrel xrel :yrel yrel :state state)
-                        (format t "Mouse motion abs(rel): ~a(~a), ~a(~a); Mouse State: (~a);~%"
-                                x xrel y yrel state))
+                        (progn
+                          (format t "Mouse motion abs(rel): ~a(~a), ~a(~a); Mouse State: (~a);~%"
+                                  x xrel y yrel state)
+                          (format t "Mouse game position: ~a~%" (dungeon/camera:camera-get-mouse-game-position *camera-main*))))
           (:idle ()
                  (progn
                    (update-delta)

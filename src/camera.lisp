@@ -5,21 +5,40 @@
            #:camera-render-target-axis
            #:camera-render-glyph
            #:camera-render-glyph-array
-           #:camera-position-setf
-           #:camera-target-position-setf
            #:camera-position+
            #:camera-position-
            #:camera-target-position+
            #:camera-target-position-
+           #:camera-game-position+
+           #:camera-game-position-
            #:camera-all-position+
-           #:camera-all-position-))
+           #:camera-all-position-
+           #:camera-get-mouse-game-position))
 (in-package :dungeon/camera)
 
+;; 渲染使用camera-position和camera-target-position
+;; 如果修改了game-position，那么自动更新上面两个位置
 (defclass camera ()
   ((camera-renderer :initarg :camera-renderer :accessor camera-renderer)
    (camera-viewport-size :initarg :camera-viewport-size :accessor camera-viewpor-size)
+   (camera-game-position :initarg :camera-game-position :accessor camera-game-position :initform (vec3 0 0 25))
+   (camera-target-game-position :initarg :camera-target-game-position :accessor camera-target-game-position :initform (vec3 0 0 0))
    (camera-position :initarg :camera-position :accessor camera-position)
    (camera-target-position :initarg :camera-target-position :accessor camera-target-position)))
+
+(defmethod (setf camera-game-position) ((new-game-position vec3) (camera camera))
+  (setf (slot-value camera 'camera-game-position) (vec3
+                                                   (round (vx new-game-position))
+                                                   (round (vy new-game-position))
+                                                   (round (vz new-game-position))))
+  (setf (slot-value camera 'camera-position) (v* *glyph-size* new-game-position)))
+
+(defmethod (setf camera-target-game-position) ((new-target-game-position vec3) (camera camera))
+  (setf (slot-value camera 'camera-target-game-position) (vec3
+                                                          (round (vx new-target-game-position))
+                                                          (round (vy new-target-game-position))
+                                                          (round (vz new-target-game-position))))
+  (setf (slot-value camera 'camera-target-position) (v* *glyph-size* new-target-game-position)))
 
 (defmethod camera-is-in-viewport-p ((camera camera) (position vec3))
   (with-slots (camera-target-position camera-viewport-size) camera
@@ -122,13 +141,10 @@
                   (sdl2:render-draw-line camera-renderer 0 y viewport-width y)))
       )))
 
-(defmethod camera-position-setf ((camera camera) (new-position vec3))
-  (with-slots (camera-position) camera
-    (setf camera-position new-position)))
-
-(defmethod camera-target-position-setf ((camera camera) (new-position vec3))
-  (with-slots (camera-position) camera
-    (setf camera-target-position new-position)))
+(defmethod camera-position-sync ((camera camera))
+  (with-slots (camera-position camera-target-position camera-game-position camera-target-game-position) camera
+    (setf camera-position (v* *glyph-size* camera-game-position))
+    (setf camera-target-position (v* *glyph-size* camera-target-game-position))))
 
 (defmethod camera-position+ ((camera camera) (offset vec3))
   (with-slots (camera-position) camera
@@ -146,10 +162,46 @@
   (with-slots (camera-target-position) camera
     (nv- camera-target-position offset)))
 
+(defmethod camera-game-position+ ((camera camera) (offset vec3))
+  (with-slots (camera-game-position camera-target-game-position) camera
+    (nv+ camera-game-position offset)
+    (nv+ camera-target-game-position offset))
+  (camera-position-sync camera))
+
+(defmethod camera-game-position- ((camera camera) (offset vec3))
+  (with-slots (camera-game-position camera-target-game-position) camera
+    (nv- camera-game-position offset)
+    (nv- camera-target-game-position offset))
+  (camera-position-sync camera))
+
+;; all 指的是position和target-position
 (defmethod camera-all-position+ ((camera camera) (offset vec3))
   (camera-target-position+ camera offset)
   (camera-position+ camera offset))
 
+;; all 指的是position和target-position
 (defmethod camera-all-position- ((camera camera) (offset vec3))
   (camera-target-position- camera offset)
   (camera-position- camera offset))
+
+(defun global-to-local (x)
+  (let* ((distance (+ (abs x) (/ *glyph-size* 2)))
+         (axis-x (floor (/ distance *glyph-size*))))
+    (if (>= x 0)
+        axis-x
+        (- 0 axis-x))))
+
+(defmethod camera-compute-mouse-game-position ((camera camera) (mouse-state vec3))
+  (with-slots (camera-game-position camera-viewport-size) camera
+    (let* ((position-relative-to-center (v- mouse-state (vec3 (/ (vx camera-viewport-size) 2)
+                                                              (/ (vy camera-viewport-size) 2)
+                                                              0)))
+           (game-position-relative-to-center (vec3 (global-to-local (vx position-relative-to-center))
+                                                   (global-to-local (vy position-relative-to-center))
+                                                   (vz position-relative-to-center)))
+           (game-position (v+ game-position-relative-to-center (vxy_ camera-game-position))))
+      game-position)))
+
+(defmethod camera-get-mouse-game-position ((camera camera))
+  (multiple-value-bind (x y other-state) (sdl2:mouse-state)
+    (camera-compute-mouse-game-position camera (vec3 x y other-state))))
