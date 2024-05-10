@@ -1,6 +1,7 @@
 (defpackage :dungeon/camera
   (:use :cl :3d-vectors :dungeon/glyph :dungeon/globals)
   (:export #:camera
+           #:camera-render-mapgrid
            #:camera-render-target-axis
            #:camera-render-glyph
            #:camera-render-glyph-array
@@ -84,7 +85,7 @@
 
 (defmethod camera-render-target-axis ((camera camera))
   "渲染camera的准星"
-  (camera-render-char camera #\+ (camera-target-position camera) (vec3 #xFF 0 0)))
+  (camera-render-char camera #\@ (v- (camera-target-position camera) (vec3 (/ *glyph-size* 2) (/ *glyph-size* 2))) (vec3 #xFF 0 0)))
 
 ;; TODO 不在viewport内部的glyph不渲染
 (defmethod camera-render-glyph ((camera camera) (glyph glyph))
@@ -103,6 +104,23 @@
   (loop :for glyph :across glyph-array
         :do (when (typep glyph 'glyph)
               (camera-render-glyph camera glyph))))
+
+(defmethod camera-render-mapgrid ((camera camera))
+  (with-slots (camera-viewport-size camera-renderer) camera
+    (let* ((viewport-width (round (vx camera-viewport-size)))
+           (viewport-height (round (vy camera-viewport-size)))
+           (v-line-nums (round (/ viewport-width *glyph-size*)))
+           (h-line-nums (round (/ viewport-height *glyph-size*))))
+      (sdl2:set-render-draw-color camera-renderer 255 255 255 255)
+      (loop :for v-index :from 0 :to v-line-nums 
+            :do (let* ((line-index (- v-index (round (/ v-line-nums 2))))
+                       (x (round (+ (/ *glyph-size* 2) (/ viewport-width 2) (* *glyph-size* line-index)))))
+                  (sdl2:render-draw-line camera-renderer x 0 x viewport-height)))
+      (loop :for h-index :from 0 :to h-line-nums 
+            :do (let* ((line-index (- h-index (round (/ h-line-nums 2))))
+                       (y (round (+ (/ *glyph-size* 2) (/ viewport-height 2) (* *glyph-size* line-index)))))
+                  (sdl2:render-draw-line camera-renderer 0 y viewport-width y)))
+      )))
 
 (defmethod camera-position-setf ((camera camera) (new-position vec3))
   (with-slots (camera-position) camera

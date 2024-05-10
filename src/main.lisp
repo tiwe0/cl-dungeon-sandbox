@@ -84,14 +84,19 @@
           (:keyup (:keysym keysym)
                   (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-escape)
                     (sdl2:push-event :quit)))
+          (:mousemotion (:x x :y y :xrel xrel :yrel yrel :state state)
+                        (format t "Mouse motion abs(rel): ~a(~a), ~a(~a); Mouse State: (~a);~%"
+                                x xrel y yrel state))
           (:idle ()
                  (progn
                    (update-delta)
                    (when *should-render*
                      (progn
-                       (sdl2:set-render-draw-color renderer #xFF #xFF #xFF #xFF)
+                       (sdl2:set-render-draw-color renderer #x00 #x00 #x00 #xFF)
                        (sdl2:render-clear renderer)
+                       (dungeon/camera:camera-render-mapgrid *camera-main*)
                        (dungeon/camera:camera-render-target-axis *camera-main*)
                        (dungeon/camera:camera-render-glyph-array *camera-main* *glyph-array*)
+                       (dungeon/camera::camera-viewport-render-char *camera-main* #\@ (vec2 0 0))
                        (sdl2:render-present renderer))))))))))
 

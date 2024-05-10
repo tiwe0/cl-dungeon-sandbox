@@ -8,7 +8,12 @@
 (defclass glyph ()
   ((glyph-string :accessor glyph-string :initarg :glyph-string :initform "····*")
    (glyph-color :accessor glyph-color :initarg :glyph-color :initform (vec3 0 0 0))
-   (glyph-position :accessor glyph-position :initarg :glyph-position :initform (vec3 0 0 0))))
+   (glyph-game-position :accessor glyph-game-position :initarg :glyph-game-position :initform (vec2 0 0))))
+
+(defmethod glyph-position ((glyph glyph))
+  (with-slots (glyph-game-position) glyph
+    (let ((render-position (v* *glyph-size* glyph-game-position)))
+      (v- (vec3 (vx render-position) (vy render-position) 0) (vec3 (/ *glyph-size* 2) (/ *glyph-size* 2) 0)))))
 
 (defmethod initialize-instance :after ((glyph glyph) &rest initargs)
   (format t "glyph has been created.~%")
@@ -38,10 +43,10 @@
     (format t "try clear glyph texture: ~a" c)
     (sdl2:destroy-texture (gethash *glyph-texture* c))))
 
-(defvar test-glyph-1 (make-instance 'glyph :glyph-position (vec3 80 80 0)))
-(defvar test-glyph-2 (make-instance 'glyph :glyph-position (vec3 0 0 0) :glyph-color (vec3 0 255 0)))
+(defvar test-glyph-1 (make-instance 'glyph :glyph-game-position (vec2 0 0) :glyph-color (vec3 255 255 255)))
+(defvar test-glyph-2 (make-instance 'glyph :glyph-game-position (vec2 0 4) :glyph-color (vec3 0 255 0)))
 
-(defvar test-glyph-3 (make-instance 'glyph :glyph-position (vec3 -80 80 0) :glyph-color (list (vec3 255 0 0)
+(defvar test-glyph-3 (make-instance 'glyph :glyph-game-position (vec2 6 0) :glyph-color (list (vec3 255 0 0)
                                                                                               (vec3 0 255 0)
                                                                                               (vec3 0 0 255)
                                                                                               (vec3 255 255 0)
