@@ -20,6 +20,18 @@
    (camera-position :initarg :camera-position :accessor camera-position)
    (camera-target-position :initarg :camera-target-position :accessor camera-target-position)))
 
+(defmethod camera-is-in-viewport-p ((camera camera) (position vec3))
+  (with-slots (camera-target-position camera-viewport-size) camera
+    (let* ((relative-position (v- position camera-target-position))
+           (relative-x (abs (vx relative-position)))
+           (relative-y (abs (vy relative-position)))
+           (half-viewport-width (/ (vx camera-viewport-size) 2))
+           (half-viewport-height (/ (vy camera-viewport-size) 2)))
+      (if (and (<= relative-x half-viewport-width)
+               (<= relative-y half-viewport-height))
+          t
+          nil))))
+
 (defmethod camera-viewport-origin-position ((camera camera))
   "计算viewport的原点位置"
   (with-slots (camera-target-position camera-viewport-size) camera
@@ -79,9 +91,12 @@
   "渲染glyph"
   (loop :for index :from 0
         :for c :across (dungeon/glyph::glyph-string glyph)
-        :do (let ((glyph-char-position (v+ (dungeon/glyph::glyph-position glyph) (v* index (vec3 0 0 *glyph-size*))))
-                  (glyph-char-color (dungeon/glyph::glyph-char-color glyph index)))
-              (camera-render-char camera c glyph-char-position glyph-char-color))))
+        :do (let ((glyph-position (dungeon/glyph::glyph-position glyph)))
+              (when (camera-is-in-viewport-p camera glyph-position)
+                (let ((glyph-char-position (v+ glyph-position (v* index (vec3 0 0 *glyph-size*))))
+                      (glyph-char-color (dungeon/glyph::glyph-char-color glyph index)))
+                  (camera-render-char camera c glyph-char-position glyph-char-color))))))
+
 
 (defmethod camera-render-glyph-array ((camera camera) (glyph-array array))
   "渲染全部glyph"

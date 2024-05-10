@@ -89,7 +89,6 @@
                    (update-delta)
                    (when *should-render*
                      (progn
-                       (format t "time elapsed: ~a~%" *current-delta*)
                        (sdl2:set-render-draw-color renderer #xFF #xFF #xFF #xFF)
                        (sdl2:render-clear renderer)
                        (dungeon/camera:camera-render-target-axis *camera-main*)
