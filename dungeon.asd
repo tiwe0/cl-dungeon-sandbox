@@ -9,6 +9,7 @@
                (:file "src/font")
                (:file "src/glyph")
                (:file "src/camera")
+               (:file "src/twener")
                (:file "src/main")))
 
 (asdf:defsystem "dungeon/test"

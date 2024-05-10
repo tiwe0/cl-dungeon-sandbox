@@ -16,6 +16,14 @@
 (defun render ()
   (setf *should-render* t))
 
+(defparameter *current-ticks* nil)
+(defparameter *current-delta* nil)
+
+(defun update-delta ()
+  (let ((current-ticks (sdl2:get-ticks)))
+    (setf *current-delta* (/ (- current-ticks *current-ticks*) 1000))
+    (setf *current-ticks* current-ticks)))
+
 (defun main ()
   ;; init sdl2
   (sdl2:with-init (:video)
@@ -32,6 +40,9 @@
                                            :camera-target-position (vec3 0 0 0)))
         ;; 初始化字符纹理
         (dungeon/glyph:init-glyph-texture renderer)
+        ;; 初始化ticks
+        (setf *current-ticks* (sdl2:get-ticks))
+        (update-delta)
         (sdl2:with-event-loop (:method :poll)
           (:quit () (progn
                       (format t "~a~%" "bye~")
@@ -41,6 +52,7 @@
                     (let ((scancode (sdl2:scancode-value keysym))
                           (sym (sdl2:sym-value keysym))
                           (mod-value (sdl2:mod-value keysym)))
+                      (update-delta)
                       (cond
                         ((sdl2:scancode= scancode :scancode-w)
                          (progn
@@ -73,11 +85,14 @@
                   (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-escape)
                     (sdl2:push-event :quit)))
           (:idle ()
-                 (when *should-render*
-                   (progn
-                     (sdl2:set-render-draw-color renderer #xFF #xFF #xFF #xFF)
-                     (sdl2:render-clear renderer)
-                     (dungeon/camera:camera-render-glyph-array *camera-main* *glyph-array*)
-                     (dungeon/camera:camera-render-target-axis *camera-main*)
-                     (sdl2:render-present renderer)))))))))
+                 (progn
+                   (update-delta)
+                   (when *should-render*
+                     (progn
+                       (format t "time elapsed: ~a~%" *current-delta*)
+                       (sdl2:set-render-draw-color renderer #xFF #xFF #xFF #xFF)
+                       (sdl2:render-clear renderer)
+                       (dungeon/camera:camera-render-target-axis *camera-main*)
+                       (dungeon/camera:camera-render-glyph-array *camera-main* *glyph-array*)
+                       (sdl2:render-present renderer))))))))))
 
