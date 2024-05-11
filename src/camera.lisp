@@ -83,6 +83,16 @@
      ,@body
      (sdl2:set-texture-color-mod ,texture #xFF #xFF #xFF)))
 
+;; darken
+(defmacro with-texture-color-darken (texture darken &body body)
+  `(progn
+     (with-texture-color-change texture (v* (vec3 255 255 255) darken)
+       ,@body)))
+
+;; darken color
+(defun darken-color (color darken)
+  (v* color darken))
+
 ;; 注意这里是 vec2 （使用默认颜色）
 (defmethod camera-viewport-render-char ((camera camera) (char character) (position vec2) &optional (color (vec3 0 0 0)))
   "渲染单个char"
@@ -112,11 +122,10 @@
   (loop :for index :from 0
         :for c :across (dungeon/glyph::glyph-string glyph)
         :do (let ((glyph-position (dungeon/glyph::glyph-position glyph)))
-              (when (camera-is-in-viewport-p camera glyph-position)
-                (let ((glyph-char-position (v+ glyph-position (v* index (vec3 0 0 *glyph-size*))))
-                      (glyph-char-color (dungeon/glyph::glyph-char-color glyph index)))
-                  (camera-render-char camera c glyph-char-position glyph-char-color))))))
-
+                (let* ((glyph-char-position (v+ glyph-position (v* index (vec3 0 0 *glyph-size*))))
+                       (glyph-char-depth (dungeon/glyph::glyph-depth glyph index))
+                       (glyph-char-color (darken-color (dungeon/glyph::glyph-char-color glyph index) (expt 0.8 glyph-char-depth))))
+                  (camera-render-char camera c glyph-char-position glyph-char-color)))))
 
 (defmethod camera-render-glyph-array ((camera camera) (glyph-array array))
   "渲染全部glyph"

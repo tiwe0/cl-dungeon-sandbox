@@ -6,6 +6,7 @@
   :serial t
   :depends-on (:sdl2 :sdl2-image :sdl2-ttf :3d-vectors)
   :components ((:file "src/globals")
+               (:file "src/color")
                (:file "src/font")
                (:file "src/glyph")
                (:file "src/camera")
