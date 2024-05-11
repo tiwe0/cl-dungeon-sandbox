@@ -1,5 +1,6 @@
 (defpackage :dungeon/color
-  (:use :cl))
+  (:use :cl :3d-vectors)
+  )
 (in-package :dungeon/color)
 
 (defparameter +maroon+ (vec3 128 0 0))
@@ -141,3 +142,8 @@
 (defparameter +gainsboro+ (vec3 220 220 220))
 (defparameter +white-smoke+ (vec3 245 245 245))
 (defparameter +white+ (vec3 255 255 255))
+
+(let ((pack (find-package :dungeon/color)))
+  (do-all-symbols (sym pack)
+    (when (eql (symbol-package sym) pack)
+      (export sym))))

@@ -24,5 +24,5 @@
 init_version
 ![init_version](doc/image/init_version.png)
 
-## 渲染算法
-TODO
+color_version
+![color_version](doc/image/color_version.png)

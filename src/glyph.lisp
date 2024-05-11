@@ -1,5 +1,5 @@
 (defpackage :dungeon/glyph
-  (:use :cl :3d-vectors :dungeon/globals)
+  (:use :cl :3d-vectors :dungeon/globals :dungeon/color)
   (:export #:glyph
            #:init-glyph-texture
            #:clear-glyph-texture))
@@ -53,8 +53,8 @@
 
 (defvar test-glyph-1 (make-instance 'glyph :glyph-game-position (vec2 0 0) :glyph-color (vec3 255 255 255)))
 (defvar test-glyph-2 (make-instance 'glyph :glyph-game-position (vec2 0 4) :glyph-color (vec3 0 255 0)))
-(defvar test-glyph-3 (make-instance 'glyph :glyph-game-position (vec2 6 0) :glyph-color (list (vec3 255 0 0)
-                                                                                              (vec3 255 0 255)
-                                                                                              (vec3 255 0 255)
-                                                                                              (vec3 255 0 255)
-                                                                                              (vec3 255 0 255))))
+(defvar test-glyph-3 (make-instance 'glyph :glyph-game-position (vec2 6 0) :glyph-color (list dungeon/color::+brown+
+                                                                                              dungeon/color::+brown+
+                                                                                              dungeon/color::+brown+
+                                                                                              dungeon/color::+brown+
+                                                                                              (vec3 0 255 0))))
