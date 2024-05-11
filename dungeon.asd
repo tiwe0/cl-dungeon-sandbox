@@ -6,12 +6,15 @@
   :serial t
   :depends-on (:sdl2 :sdl2-image :sdl2-ttf :3d-vectors)
   :components ((:file "src/globals")
+               (:file "src/timer")
                (:file "src/color")
                (:file "src/glyph")
                (:file "src/gamemap")
                (:file "src/font")
+               (:file "src/text")
                (:file "src/camera")
                (:file "src/twener")
+               (:file "src/inputhandler")
                (:file "src/main")))
 
 (asdf:defsystem "dungeon/test"

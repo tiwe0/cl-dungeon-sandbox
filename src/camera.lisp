@@ -6,6 +6,7 @@
            #:camera-render-glyph
            #:camera-render-glyph-array
            #:camera-render-gamemap
+           #:camera-render-text-array
            #:camera-position+
            #:camera-position-
            #:camera-target-position+
@@ -155,6 +156,12 @@
                        (y (round (+ (/ *glyph-size* 2) (/ viewport-height 2) (* *glyph-size* line-index)))))
                   (sdl2:render-draw-line camera-renderer 0 y viewport-width y)))
       )))
+
+(defmethod camera-render-text-array ((camera camera))
+  (loop :for text-struct :across *text-array*
+        :do (when text-struct 
+              (dungeon/text:render (camera-renderer camera) text-struct)
+              )))
 
 (defmethod camera-position-sync ((camera camera))
   (with-slots (camera-position camera-target-position camera-game-position camera-target-game-position) camera

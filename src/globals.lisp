@@ -1,5 +1,21 @@
 (defpackage :dungeon/globals
-  (:use :cl))
+  (:use :cl)
+  (:export #:*screen-width*
+           #:*screen-height*
+           #:*glyph-size*
+           #:*glyph-font*
+           #:*glyph-font-path*
+           #:*glyph-array*
+           #:*glyph-texture*
+           #:*glyph-chars*
+           #:*camera-main*
+           #:*gamemap-main*
+           #:*should-render*
+           #:*current-ticks*
+           #:*current-delta*
+           #:*text-font-path*
+           #:*text-font*
+           #:*text-array*))
 (in-package :dungeon/globals)
 
 ;; screen
@@ -20,7 +36,16 @@
 ;; gamemap
 (defparameter *gamemap-main nil)
 
-(let ((pack (find-package :dungeon/globals)))
-  (do-all-symbols (sym pack)
-    (when (eql (symbol-package sym) pack)
-      (export sym))))
+;; render
+(defparameter *should-render* t)
+
+;; timer
+(defparameter *current-ticks* nil)
+(defparameter *current-delta* nil)
+
+;; font
+(defparameter *text-font-path* (asdf:system-relative-pathname 'dungeon "assets/fonts/PixelTextFont-Regular.ttf"))
+(defparameter *text-font* nil)
+
+(defparameter *text-array* (make-array 20 :adjustable t :fill-pointer 0))
+
