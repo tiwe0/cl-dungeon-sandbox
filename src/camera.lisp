@@ -1,10 +1,11 @@
 (defpackage :dungeon/camera
-  (:use :cl :3d-vectors :dungeon/glyph :dungeon/globals)
+  (:use :cl :3d-vectors :dungeon/glyph :dungeon/globals :dungeon/gamemap)
   (:export #:camera
            #:camera-render-mapgrid
            #:camera-render-target-axis
            #:camera-render-glyph
            #:camera-render-glyph-array
+           #:camera-render-gamemap
            #:camera-position+
            #:camera-position-
            #:camera-target-position+
@@ -116,16 +117,21 @@
   "渲染camera的准星"
   (camera-render-char camera #\@ (v- (camera-target-position camera) (vec3 (/ *glyph-size* 2) (/ *glyph-size* 2))) (vec3 #xFF 0 0)))
 
+(defmethod camera-render-gamemap ((camera camera) (gamemap gamemap))
+  "渲染gamemap"
+  (with-slots (gamemap-glyph-array) gamemap
+    (camera-render-glyph-array camera gamemap-glyph-array)))
+
 ;; TODO 不在viewport内部的glyph不渲染
 (defmethod camera-render-glyph ((camera camera) (glyph glyph))
   "渲染glyph"
   (loop :for index :from 0
         :for c :across (dungeon/glyph::glyph-string glyph)
         :do (let ((glyph-position (dungeon/glyph::glyph-position glyph)))
-                (let* ((glyph-char-position (v+ glyph-position (v* index (vec3 0 0 *glyph-size*))))
-                       (glyph-char-depth (dungeon/glyph::glyph-depth glyph index))
-                       (glyph-char-color (darken-color (dungeon/glyph::glyph-char-color glyph index) (expt 0.8 glyph-char-depth))))
-                  (camera-render-char camera c glyph-char-position glyph-char-color)))))
+              (let* ((glyph-char-position (v+ glyph-position (v* index (vec3 0 0 *glyph-size*))))
+                     (glyph-char-depth (dungeon/glyph::glyph-depth glyph index))
+                     (glyph-char-color (darken-color (dungeon/glyph::glyph-char-color glyph index) (expt 0.8 glyph-char-depth))))
+                (camera-render-char camera c glyph-char-position glyph-char-color)))))
 
 (defmethod camera-render-glyph-array ((camera camera) (glyph-array array))
   "渲染全部glyph"

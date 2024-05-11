@@ -17,6 +17,8 @@
 ;; camera
 (defparameter *camera-main* nil)
 
+;; gamemap
+(defparameter *gamemap-main nil)
 
 (let ((pack (find-package :dungeon/globals)))
   (do-all-symbols (sym pack)

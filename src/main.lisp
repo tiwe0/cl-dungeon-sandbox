@@ -19,6 +19,15 @@
 (defparameter *current-ticks* nil)
 (defparameter *current-delta* nil)
 
+(defun test-glyph ()
+  (defvar test-glyph-1 (make-instance 'dungeon/glyph:glyph :glyph-game-position (vec2 0 0) :glyph-color (vec3 255 255 255) :glyph-gamemap *gamemap-main*))
+  (defvar test-glyph-2 (make-instance 'dungeon/glyph:glyph :glyph-game-position (vec2 0 4) :glyph-color (vec3 0 255 0) :glyph-gamemap *gamemap-main*))
+  (defvar test-glyph-3 (make-instance 'dungeon/glyph:glyph :glyph-game-position (vec2 6 0) :glyph-gamemap *gamemap-main* :glyph-color (list dungeon/color::+brown+
+                                                                                                dungeon/color::+brown+
+                                                                                                dungeon/color::+brown+
+                                                                                                dungeon/color::+brown+
+                                                                                                (vec3 0 255 0)))))
+
 (defun update-delta ()
   (let ((current-ticks (sdl2:get-ticks)))
     (setf *current-delta* (/ (- current-ticks *current-ticks*) 1000))
@@ -32,14 +41,18 @@
       (sdl2:with-renderer (renderer window :index -1 :flags '(:accellerated))
         ;; 加载字体
         (dungeon/font:init-font)
+        ;; 初始化字符纹理
+        (dungeon/glyph:init-glyph-texture renderer)
         ;; 创建camera
         (setf *camera-main* (make-instance 'dungeon/camera:camera
                                            :camera-renderer renderer
                                            :camera-viewport-size (vec2 800 600)
                                            :camera-position (vec3 0 0 800)
                                            :camera-target-position (vec3 0 0 0)))
-        ;; 初始化字符纹理
-        (dungeon/glyph:init-glyph-texture renderer)
+        ;; 创建游戏地图
+        (setf *gamemap-main* (make-instance 'dungeon/gamemap:gamemap))
+        ;; 创建glyph
+        (test-glyph)
         ;; 初始化ticks
         (setf *current-ticks* (sdl2:get-ticks))
         (update-delta)
@@ -98,7 +111,7 @@
                        (sdl2:render-clear renderer)
                        (dungeon/camera:camera-render-mapgrid *camera-main*)
                        (dungeon/camera:camera-render-target-axis *camera-main*)
-                       (dungeon/camera:camera-render-glyph-array *camera-main* *glyph-array*)
+                       (dungeon/camera:camera-render-gamemap *camera-main* *gamemap-main*)
                        (dungeon/camera::camera-viewport-render-char *camera-main* #\@ (vec2 0 0))
                        (sdl2:render-present renderer))))))))))
 
