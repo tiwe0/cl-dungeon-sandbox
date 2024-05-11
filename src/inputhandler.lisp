@@ -76,5 +76,6 @@
       (dungeon/camera:camera-render-gamemap *camera-main* *gamemap-main*)
       (dungeon/camera::camera-viewport-render-char *camera-main* #\@ (vec2 0 0))
       (dungeon/camera:camera-render-text-array *camera-main*)
+      (dungeon/text:render-text renderer (format nil "~a" (dungeon/camera:camera-get-mouse-game-position *camera-main*)) (vec2 4 4) dungeon/color:+yellow+)
       (sdl2:render-present renderer))))
 
